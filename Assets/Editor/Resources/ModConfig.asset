@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 615501dbe4f3fe94fbf4b564abb10237, type: 3}
+  m_Name: ModConfig
+  m_EditorClassIdentifier: 
+  id: kataWireOrdering
+  title: Wire Ordering
+  author: Katarina
+  description: 'Wire Ordering - V1.4
+
+    "Just cut the wires in order."
+
+
+    Module ID: kataWireOrdering
+
+
+    Module Idea created by: EpicToast
+
+    Module Implemented by: Katarina
+
+
+    TP-Supported
+
+
+    HTML Manual Version:
+
+    https://ktane.timwi.de/HTML/Wire%20Ordering.html
+
+
+    If there are any problems that you may have, contact me via Discord: Smexy Katarina#5259
+
+'
+  version: 1.2
+  outputFolder: build
+  previewImage: {fileID: 2800000, guid: 1dd116be6729a184b9c9a4f98255c8fb, type: 3}
