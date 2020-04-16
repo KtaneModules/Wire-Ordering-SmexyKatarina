@@ -413,4 +413,41 @@ public class WireOrderingScript : MonoBehaviour {
 		yield break;
 	}
 	// 
+
+	#pragma warning disable 414
+	private readonly string TwitchHelpMessage = @"!{0} cut 1 2 3 4 [Cut's the wire at the position needed, chain by spaces]";
+	#pragma warning restore 414
+
+	IEnumerator ProcessTwitchCommand(string command) {
+		string[] args = command.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+		if (args.Length <= 1 || args.Length >= 6) {
+			yield return "sendtochaterror That is an incorrect amount of arguments, please try again.";
+		}
+		if (!args[0].ToLower().Equals("cut")) {
+			yield return "sendtochaterror That is an incorrect command, please try again.";
+		}
+		List<int> wirePos = new List<int>();
+		foreach (string s in args) {
+			int result;
+			if (s.ToLower().Equals("cut")) { continue; }
+			if (int.TryParse(s, out result)) {
+				wirePos.Add(int.Parse(s));
+			} else {
+				yield return "sendtochaterror Incorrect string format, please try again.";
+			}
+		}
+		foreach (int i in wirePos) {
+			_wires[i-1].OnInteract();
+			yield return new WaitForSeconds(0.1f);
+		}
+		yield break;
+	}
+
+	IEnumerator TwitchHandleForcedSolve() {
+		yield return null;
+		foreach (int i in _chosenCutOrder) {
+			_wires[i].OnInteract();
+		}
+		yield break;
+	}
 }

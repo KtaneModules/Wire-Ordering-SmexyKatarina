@@ -14,10 +14,10 @@ MonoBehaviour:
   id: kataWireOrdering
   title: Wire Ordering
   author: Katarina
-  description: "Wire Ordering - V2.0\n\"Just cut the wires in order.\"\r\n\r\nModule
+  description: "Wire Ordering - V2.1\n\"Just cut the wires in order.\"\r\n\r\nModule
     ID: kataWireOrdering\r\n\r\nModule Idea created by: EpicToast\r\nModule Implemented
-    by: Katarina\r\n\r\nUnsupported in the meantime.\n\r\nHTML Manual Version:\r\nhttps://ktane.timwi.de/HTML/Wire%20Ordering.html\r\n\r\nIf
+    by: Katarina\r\n\r\nTP Supported.\n\r\nHTML Manual Version:\r\nhttps://ktane.timwi.de/HTML/Wire%20Ordering.html\r\n\r\nIf
     there are any problems that you may have, contact me via Discord: Smexy Ahri#5259"
-  version: 2.0
+  version: 2.1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 1dd116be6729a184b9c9a4f98255c8fb, type: 3}
