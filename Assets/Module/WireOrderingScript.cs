@@ -276,7 +276,7 @@ public class WireOrderingScript : MonoBehaviour {
 			case 4:
 				for (int i = 0; i <= 3; i++)
 				{
-					_chosenCutOrder[i] = Array.IndexOf(_chosenDisNum, i+1);
+					_chosenCutOrder[i] = Array.IndexOf(_chosenColorsWire, _chosenColorsDis[Array.IndexOf(_chosenDisNum, i+1)]);
 				}
 				break;
 			case 5:
@@ -297,6 +297,7 @@ public class WireOrderingScript : MonoBehaviour {
 			case 7:
 				colorAscending = new int[4];
 				_chosenColors.CopyTo(colorAscending, 0);
+				Array.Sort(colorAscending);
 				for (int i = 0; i <= 3; i++) 
 				{
 					_chosenCutOrder[i] = Array.IndexOf(_chosenColorsDis, colorAscending[i]);
@@ -331,9 +332,10 @@ public class WireOrderingScript : MonoBehaviour {
 			return;
 		}
 		if (_statCutIndex == 4) {
+			StartCoroutine(SolveModule());
 			return;
 		}
-		if (_cutWires[_chosenCutOrder[_statCutIndex]] == true && _statCutIndex != _cutIndex)
+		if (_cutWires[_chosenCutOrder[_statCutIndex]] && _statCutIndex != _cutIndex)
 		{
 			_statCutIndex++;
 		}
@@ -368,6 +370,7 @@ public class WireOrderingScript : MonoBehaviour {
 	}
 
 	IEnumerator SolveModule() {
+		_modSolved = true;
 		char[] solve = new char[4];
 		switch (rnd.Range(0,8)) {
 			case 0:
@@ -408,7 +411,6 @@ public class WireOrderingScript : MonoBehaviour {
 			_displayTexts[i].color = new Color(0, 0, 0, 255);
 			yield return new WaitForSeconds(0.50f);
 		}
-		_modSolved = true;
 		GetComponent<KMBombModule>().HandlePass();
 		yield break;
 	}
@@ -437,6 +439,12 @@ public class WireOrderingScript : MonoBehaviour {
 			}
 		}
 		foreach (int i in wirePos) {
+			if (i <= 0 || i >= 5) {
+				yield return "sendtochaterror Incorrect wire positions, please try again.";
+				break;
+			}
+			if (_cutWires[i-1]) { continue; }
+			yield return null;
 			_wires[i-1].OnInteract();
 			yield return new WaitForSeconds(0.1f);
 		}
