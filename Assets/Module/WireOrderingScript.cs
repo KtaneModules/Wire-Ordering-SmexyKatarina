@@ -248,7 +248,8 @@ public class WireOrderingScript : MonoBehaviour {
 
 	// Generates Order of Cuts
 	void GenerateCuts() {
-		int rule = ( ((_chosenColorsDis[0]+1) * _chosenDisNum[0]) + ( (_chosenColorsDis[1]+1) * _chosenDisNum[1]) + ( (_chosenColorsDis[2]+1) * _chosenDisNum[2]) + ( (_chosenColorsDis[3]+1) * _chosenDisNum[3]) ) % 10;
+		//int rule = ( ((_chosenColorsDis[0]+1) * _chosenDisNum[0]) + ( (_chosenColorsDis[1]+1) * _chosenDisNum[1]) + ( (_chosenColorsDis[2]+1) * _chosenDisNum[2]) + ( (_chosenColorsDis[3]+1) * _chosenDisNum[3]) ) % 10;
+		int rule = 1;
 		Debug.LogFormat("[Wire Ordering #{0}]: The rule number is: {1}.", _modID, rule);
 		switch (rule) {
 			case 0:
@@ -258,9 +259,11 @@ public class WireOrderingScript : MonoBehaviour {
 				}
 				break;
 			case 1:
-				for (int i = 3; i >= 0; i--)
+				int count = 3;
+				for (int i = 0; i <= 3; i++)
 				{
-					_chosenCutOrder[i] = i;
+					_chosenCutOrder[i] = count;
+					count--;
 				}
 				break;
 			case 2:
