@@ -248,23 +248,14 @@ public class WireOrderingScript : MonoBehaviour {
 
 	// Generates Order of Cuts
 	void GenerateCuts() {
-		//int rule = ( ((_chosenColorsDis[0]+1) * _chosenDisNum[0]) + ( (_chosenColorsDis[1]+1) * _chosenDisNum[1]) + ( (_chosenColorsDis[2]+1) * _chosenDisNum[2]) + ( (_chosenColorsDis[3]+1) * _chosenDisNum[3]) ) % 10;
-		int rule = 1;
+		int rule = ( ((_chosenColorsDis[0]+1) * _chosenDisNum[0]) + ( (_chosenColorsDis[1]+1) * _chosenDisNum[1]) + ( (_chosenColorsDis[2]+1) * _chosenDisNum[2]) + ( (_chosenColorsDis[3]+1) * _chosenDisNum[3]) ) % 10;
 		Debug.LogFormat("[Wire Ordering #{0}]: The rule number is: {1}.", _modID, rule);
 		switch (rule) {
 			case 0:
-				for (int i = 0; i <= 3; i++) 
-				{
-					_chosenCutOrder[i] = i;
-				}
+				_chosenCutOrder = new int[] { 0, 1, 2, 3 };
 				break;
 			case 1:
-				int count = 3;
-				for (int i = 0; i <= 3; i++)
-				{
-					_chosenCutOrder[i] = count;
-					count--;
-				}
+				_chosenCutOrder = new int[] { 3, 2, 1, 0 };
 				break;
 			case 2:
 				for (int i = 0; i <= 3; i++) {
@@ -375,7 +366,7 @@ public class WireOrderingScript : MonoBehaviour {
 	IEnumerator SolveModule() {
 		_modSolved = true;
 		char[] solve = new char[4];
-		switch (rnd.Range(0,8)) {
+		switch (rnd.Range(0,9)) {
 			case 0:
 				solve = new char[] { 'C', 'O', 'O', 'L' };
 				break;
@@ -392,18 +383,15 @@ public class WireOrderingScript : MonoBehaviour {
 				solve = new char[] { 'D', 'O', 'P', 'E' };
 				break;
 			case 5:
-				solve = new char[] { 'L', 'E', 'W', 'D' };
-				break;
-			case 6:
 				solve = new char[] { 'E', 'P', 'I', 'C' };
 				break;
-			case 7:
+			case 6:
 				solve = new char[] { 'N', 'E', 'R', 'D' };
 				break;
-			case 8:
+			case 7:
 				solve = new char[] { 'K', 'A', 'T', 'A' };
 				break;
-			case 9:
+			case 8:
 				solve = new char[] { 'Y', 'M', 'C', 'A' };
 				break;
 		}
@@ -427,9 +415,11 @@ public class WireOrderingScript : MonoBehaviour {
 		string[] args = command.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 		if (args.Length <= 1 || args.Length >= 6) {
 			yield return "sendtochaterror That is an incorrect amount of arguments, please try again.";
+			yield break;
 		}
 		if (!args[0].ToLower().Equals("cut")) {
 			yield return "sendtochaterror That is an incorrect command, please try again.";
+			yield break;
 		}
 		List<int> wirePos = new List<int>();
 		foreach (string s in args) {
@@ -438,16 +428,17 @@ public class WireOrderingScript : MonoBehaviour {
 			if (int.TryParse(s, out result)) {
 				wirePos.Add(int.Parse(s));
 			} else {
-				yield return "sendtochaterror Incorrect string format, please try again.";
+				yield return "sendtochaterror Incorrect command format, please try again.";
 			}
 		}
+		yield return "solve";
+		yield return null;
 		foreach (int i in wirePos) {
 			if (i <= 0 || i >= 5) {
-				yield return "sendtochaterror Incorrect wire positions, please try again.";
+				yield return "sendtochaterror Incorrect wire position "+i+", please use 1-4.";
 				break;
 			}
 			if (_cutWires[i-1]) { continue; }
-			yield return null;
 			_wires[i-1].OnInteract();
 			yield return new WaitForSeconds(0.1f);
 		}
@@ -457,8 +448,11 @@ public class WireOrderingScript : MonoBehaviour {
 	IEnumerator TwitchHandleForcedSolve() {
 		yield return null;
 		foreach (int i in _chosenCutOrder) {
+			if (_cutWires[i]) { continue; }
 			_wires[i].OnInteract();
+			yield return new WaitForSeconds(0.25f);
 		}
 		yield break;
 	}
+
 }
