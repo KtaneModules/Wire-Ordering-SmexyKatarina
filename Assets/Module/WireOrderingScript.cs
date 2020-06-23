@@ -11,6 +11,7 @@ public class WireOrderingScript : MonoBehaviour {
 	// Unity Vars
 	public KMBombInfo _bomb;
 	public KMAudio _audio;
+    public KMColorblindMode _colorblind;
 
 	public KMSelectable[] _wires;
 
@@ -19,8 +20,9 @@ public class WireOrderingScript : MonoBehaviour {
 	public MeshRenderer[] _connectorRenderers1, _connectorRenderers2, _connectorRenderers3, _connectorRenderers4;
 
 	public TextMesh[] _displayTexts;
+    public TextMesh[] _colorblindTexts;
 
-	public Material[] _colorMaterials;
+    public Material[] _colorMaterials;
 
 	// Logging
 	static int _modIDCount = 1;
@@ -40,9 +42,12 @@ public class WireOrderingScript : MonoBehaviour {
 	int _cutIndex = 0;
 	int _statCutIndex = 0;
 
+    bool _modAnim = false;
+    bool _colorblindActive = false;
+
 	void Awake() {
 		_modID = _modIDCount++;
-
+        _colorblindActive = _colorblind.ColorblindModeActive;
 		foreach (KMSelectable wire in _wires) {
 			wire.OnInteract += delegate () { CutWire(wire); return false; };
 		}
@@ -67,7 +72,11 @@ public class WireOrderingScript : MonoBehaviour {
 
 	void CutWire(KMSelectable wire) {
 		int index = Array.IndexOf(_wires,wire);
-		if (index != _chosenCutOrder[_statCutIndex]) {
+        if (_cutWires[index])
+            return;
+        else
+            _audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.WireSnip, wire.transform);
+        if (index != _chosenCutOrder[_statCutIndex]) {
 			_cutIndex++;
 			_wires[index].GetComponent<Renderer>().enabled = false;
 			_wires[index].Highlight.gameObject.SetActive(false);
@@ -166,6 +175,20 @@ public class WireOrderingScript : MonoBehaviour {
 			_displayRenderers[xpos].material = _colorMaterials[color];
 			_wires[ypos].GetComponent<Renderer>().material = _colorMaterials[color];
 			_cutRenderers[ypos].material = _colorMaterials[color];
+            if (_colorblindActive)
+            {
+
+                if (_colorMaterials[color].name == "Black")
+                {
+                    _colorblindTexts[xpos].text = "K";
+                    _colorblindTexts[ypos + 4].text = "K";
+                }
+                else
+                {
+                    _colorblindTexts[xpos].text = _colorMaterials[color].name[0] + "";
+                    _colorblindTexts[ypos + 4].text = _colorMaterials[color].name[0] + "";
+                }
+            }
 			dis[xpos] = true;
 			wire[ypos] = true;
 			disc[xpos] = Array.IndexOf(_chosenColors, color);
@@ -365,83 +388,145 @@ public class WireOrderingScript : MonoBehaviour {
 
 	IEnumerator SolveModule() {
 		_modSolved = true;
-		char[] solve = new char[4];
-		switch (rnd.Range(0,9)) {
-			case 0:
-				solve = new char[] { 'C', 'O', 'O', 'L' };
-				break;
-			case 1:
-				solve = new char[] { 'G', 'O', 'O', 'D' };
-				break;
-			case 2:
-				solve = new char[] { 'D', 'O', 'N', 'E' };
-				break;
-			case 3:
-				solve = new char[] { 'N', 'I', 'C', 'E' };
-				break;
-			case 4:
-				solve = new char[] { 'D', 'O', 'P', 'E' };
-				break;
-			case 5:
-				solve = new char[] { 'E', 'P', 'I', 'C' };
-				break;
-			case 6:
-				solve = new char[] { 'N', 'E', 'R', 'D' };
-				break;
-			case 7:
-				solve = new char[] { 'K', 'A', 'T', 'A' };
-				break;
-			case 8:
-				solve = new char[] { 'Y', 'M', 'C', 'A' };
-				break;
-		}
-		for (int i = 0; i <= 3; i++) {
+        _modAnim = true;
+        char[] solve = RandomSolveString(rnd.Range(0, 9));
+        char[] solve2 = RandomSolveString(rnd.Range(0, 9));
+        char[] solve3 = RandomSolveString(rnd.Range(0, 9));
+        for (int i = 0; i <= 3; i++) {
 			_displayRenderers[i].material = _colorMaterials[6];
 			_cutRenderers[i].material = _colorMaterials[6];
+            if (_colorblindActive)
+            {
+                _colorblindTexts[i].text = solve2[i] + "";
+                _colorblindTexts[i + 4].text = solve3[i] + "";
+            }
 			_displayTexts[i].text = solve[i].ToString();
 			_displayTexts[i].color = new Color(0, 0, 0, 255);
 			yield return new WaitForSeconds(0.50f);
 		}
-		GetComponent<KMBombModule>().HandlePass();
-		yield break;
+        _audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
+        GetComponent<KMBombModule>().HandlePass();
+        _modAnim = false;
+        yield break;
 	}
+
+    private char[] RandomSolveString(int r)
+    {
+        char[] solve = new char[4];
+        switch (rnd.Range(0, 9))
+        {
+            case 0:
+                solve = new char[] { 'C', 'O', 'O', 'L' };
+                break;
+            case 1:
+                solve = new char[] { 'G', 'O', 'O', 'D' };
+                break;
+            case 2:
+                solve = new char[] { 'D', 'O', 'N', 'E' };
+                break;
+            case 3:
+                solve = new char[] { 'N', 'I', 'C', 'E' };
+                break;
+            case 4:
+                solve = new char[] { 'D', 'O', 'P', 'E' };
+                break;
+            case 5:
+                solve = new char[] { 'E', 'P', 'I', 'C' };
+                break;
+            case 6:
+                solve = new char[] { 'N', 'E', 'R', 'D' };
+                break;
+            case 7:
+                solve = new char[] { 'K', 'A', 'T', 'A' };
+                break;
+            case 8:
+                solve = new char[] { 'Y', 'M', 'C', 'A' };
+                break;
+        }
+        return solve;
+    }
 	// 
 
 	#pragma warning disable 414
-	private readonly string TwitchHelpMessage = @"!{0} cut 1 2 3 4 [Cut's the wire at the position needed, chain by spaces]";
+	private readonly string TwitchHelpMessage = @"!{0} cut 1 2 3 4 [Cut's the wire at the position needed, chain by spaces] | !{0} colorblind [Toggles colorblind mode]";
 	#pragma warning restore 414
 
 	IEnumerator ProcessTwitchCommand(string command) {
 		string[] args = command.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-		if (args.Length <= 1 || args.Length >= 6) {
-			yield return "sendtochaterror That is an incorrect amount of arguments, please try again.";
-			yield break;
-		}
-		if (!args[0].ToLower().Equals("cut")) {
-			yield return "sendtochaterror That is an incorrect command, please try again.";
-			yield break;
-		}
-		List<int> wirePos = new List<int>();
-		foreach (string s in args) {
-			int result;
-			if (s.ToLower().Equals("cut")) { continue; }
-			if (int.TryParse(s, out result)) {
-				wirePos.Add(int.Parse(s));
-			} else {
-				yield return "sendtochaterror Incorrect command format, please try again.";
-			}
-		}
-		yield return "solve";
-		yield return null;
-		foreach (int i in wirePos) {
-			if (i <= 0 || i >= 5) {
-				yield return "sendtochaterror Incorrect wire position "+i+", please use 1-4.";
-				break;
-			}
-			if (_cutWires[i-1]) { continue; }
-			_wires[i-1].OnInteract();
-			yield return new WaitForSeconds(0.1f);
-		}
+        yield return null;
+        if (command.ToLower().Equals("colorblind"))
+        {
+            if (_colorblindActive)
+            {
+                _colorblindActive = false;
+                for (int i = 0; i < 8; i++)
+                {
+                    _colorblindTexts[i].text = "";
+                }
+            }
+            else
+            {
+                _colorblindActive = true;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (_colorMaterials[_chosenColorsDis[i]].name == "Black")
+                    {
+                        _colorblindTexts[i].text = "K";
+                    }
+                    else
+                    {
+                        _colorblindTexts[i].text = _colorMaterials[_chosenColorsDis[i]].name[0] + "";
+                    }
+                    if (_colorMaterials[_chosenColorsWire[i]].name == "Black")
+                    {
+                        _colorblindTexts[i + 4].text = "K";
+                    }
+                    else
+                    {
+                        _colorblindTexts[i + 4].text = _colorMaterials[_chosenColorsWire[i]].name[0] + "";
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (args.Length <= 1 || args.Length >= 6)
+            {
+                yield return "sendtochaterror That is an incorrect amount of arguments, please try again.";
+                yield break;
+            }
+            if (!args[0].ToLower().Equals("cut"))
+            {
+                yield return "sendtochaterror That is an incorrect command, please try again.";
+                yield break;
+            }
+            List<int> wirePos = new List<int>();
+            foreach (string s in args)
+            {
+                int result;
+                if (s.ToLower().Equals("cut")) { continue; }
+                if (int.TryParse(s, out result))
+                {
+                    wirePos.Add(int.Parse(s));
+                }
+                else
+                {
+                    yield return "sendtochaterror Incorrect command format, please try again.";
+                }
+            }
+            yield return "solve";
+            foreach (int i in wirePos)
+            {
+                if (i <= 0 || i >= 5)
+                {
+                    yield return "sendtochaterror Incorrect wire position " + i + ", please use 1-4.";
+                    break;
+                }
+                if (_cutWires[i - 1]) { continue; }
+                _wires[i - 1].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
 		yield break;
 	}
 
@@ -450,8 +535,9 @@ public class WireOrderingScript : MonoBehaviour {
 		foreach (int i in _chosenCutOrder) {
 			if (_cutWires[i]) { continue; }
 			_wires[i].OnInteract();
-			yield return new WaitForSeconds(0.25f);
+			yield return new WaitForSeconds(0.1f);
 		}
+        while (_modAnim) { yield return true; yield return new WaitForSeconds(0.1f); }
 		yield break;
 	}
 
